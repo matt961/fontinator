@@ -1,0 +1,5 @@
+[production]
+address = "fontinator.me"
+port = 80
+workers = 2
+log = "critical"
