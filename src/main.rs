@@ -24,7 +24,8 @@ use rocket::request::{
     //    FromParam,
     //    FromForm,
     FromFormValue,
-    Form
+    Form,
+    Request
 };
 use rocket::response::content;
 
@@ -79,9 +80,16 @@ fn css() -> content::Css<&'static str> {
     )
 }
 
+#[error(404)]
+fn not_found(req: &Request) -> String {
+    "Hello there :~)".to_string()
+}
+
 fn main() {
     rocket::ignite()
-        .mount("/", routes![font_randomizer, index, css]).launch();
+        .mount("/", routes![font_randomizer, index, css])
+        .catch(errors![not_found])
+        .launch();
 }
 
 #[derive(Debug, FromForm)]
