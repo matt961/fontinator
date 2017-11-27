@@ -1,38 +1,53 @@
-<link href="https://fonts.googleapis.com/css?family=Audiowide|Bangers|Ceviche+One|Cinzel+Decorative|Homemade+Apple|Indie+Flower|Just+Another+Hand|Lobster|Love+Ya+Like+A+Sister|Nosifer|Pacifico|Permanent+Marker|Poiret+One|Press+Start+2P|Sedgwick+Ave+Display" rel="stylesheet">
+@import url('https://fonts.googleapis.com/css?family=Atomic+Age|Bigelow+Rules|Bungee+Shade|Freckle+Face|Fugaz+One|Geostar+Fill|Knewave|Libre+Barcode+39+Extended+Text|Lobster|Lobster+Two|Macondo+Swash+Caps|Meddon|Molle:400i|Monoton|Mr+Dafoe|Shrikhand|Vast+Shadow');
 
-
+.font-a {
     font-family: 'Macondo Swash Caps', cursive;
-
+}
+.font-b {
     font-family: 'Lobster', cursive;
-
+}
+.font-c {
     font-family: 'Atomic Age', cursive;
-
+}
+.font-d {
     font-family: 'Bigelow Rules', cursive;
-
+}
+.font-e {
     font-family: 'Lobster Two', cursive;
-
+}
+.font-f {
     font-family: 'Shrikhand', cursive;
-
+}
+.font-g {
     font-family: 'Monoton', cursive;
-
+}
+.font-h {
     font-family: 'Fugaz One', cursive;
-
+}
+.font-i {
     font-family: 'Geostar Fill', cursive;
-
+}
+.font-j {
     font-family: 'Libre Barcode 39 Extended Text', cursive;
-
+}
+.font-k {
     font-family: 'Freckle Face', cursive;
-
+}
+.font-l {
     font-family: 'Bungee Shade', cursive;
-
+}
+.font-m {
     font-family: 'Knewave', cursive;
-
+}
+.font-n {
     font-family: 'Vast Shadow', cursive;
-
+}
+.font-o {
     font-family: 'Mr Dafoe', cursive;
-
+}
+.font-p {
     font-family: 'Meddon', cursive;
-
+}
+.font-q {
     font-family: 'Molle', cursive;
-
-
+}

@@ -4,52 +4,84 @@
 
 extern crate tokio_core;
 extern crate hyper;
+#[macro_use(ns, local_name, namespace_url)]
 extern crate html5ever;
+extern crate markup5ever;
 extern crate rocket;
 extern crate futures;
 extern crate hyper_tls;
+extern crate rand;
 
-mod fontrand;
+mod manipulation;
 mod downloader;
 
 use tokio_core::reactor::Core;
 
 use hyper::Uri;
-use hyper::error::Error;
 
 use rocket::http::RawStr;
-use rocket::request::{FromParam, FromForm, FromFormValue, Form};
+use rocket::request::{
+    //    FromParam,
+    //    FromForm,
+    FromFormValue,
+    Form
+};
 use rocket::response::content;
 
 use std::str::FromStr;
 
-#[post("/url", data="<url>")]
-fn font_randomizer(url: Form<Url>) -> content::Html<String> {
-    if let Ok(uri) = Uri::from_str(url.get().inner.as_str()) {
-        if let Ok(result) = downloader::download_page(uri) {
-            if let Ok(html) = String::from_utf8(result) {
-                content::Html(html)
-            } else {
-                content::Html("Couldn't parse a String".to_string())
-            }
-        } else {
-            content::Html("Couldn't download page :(".to_string())
-        }
-    } else {
-        content::Html("Very unexpected behavior!".to_string())
-    }
+use futures::{Future, Stream};
+
+#[post("/url", data = "<url>")]
+fn font_randomizer(url: Form<Url>) -> Result<content::Html<Vec<u8>>, String> {
+    let mut core = Core::new().map_err(|_| {
+        "Could not create an event loop :(".to_string()
+    })?;
+
+    let url: Uri = url.get().inner.parse().map_err(|_| {
+        "Not a real URL :(".to_string()
+    })?;
+
+    let scheme = url.scheme().ok_or("https")?; // default to https if there is no scheme
+    let domain = url.authority().ok_or("")?; // defaults to no domain string
+
+    let handle = &core.handle();
+    let client = downloader::new_http_client(handle)?;
+    let download = downloader::download_page(url.clone(), client)
+        .and_then(|body| {
+            body.concat2()
+        })
+        .map_err(|_| {
+            "Had trouble downloading web page :(".to_string()
+        })
+        .map(|all| all.to_vec());
+    let html_bytes = core.run(download)?;
+    let dom = manipulation::to_dom(&html_bytes);
+    let mut bytes = Vec::new();
+    manipulation::push_style(dom.document.clone())?;
+    manipulation::walk_and_randomize(dom.document.clone(), scheme, domain);
+    html5ever::serialize(&mut bytes, &dom.document, Default::default())
+        .map_err(|_| "Couldn't serialize your page, sorry :(".to_string())?;
+    Ok(content::Html(bytes.to_vec()))
 }
 
 #[get("/")]
-fn hello() -> content::Html<&'static str> {
+fn index() -> content::Html<&'static str> {
     content::Html(
         include_str!("index.html")
     )
 }
 
+#[get("/random-style.css")]
+fn css() -> content::Css<&'static str> {
+    content::Css(
+        include_str!("random-style.css")
+    )
+}
+
 fn main() {
     rocket::ignite()
-        .mount("/", routes![font_randomizer, hello]).launch();
+        .mount("/", routes![font_randomizer, index, css]).launch();
 }
 
 #[derive(Debug, FromForm)]
@@ -59,7 +91,7 @@ struct Url {
 }
 
 impl<'a> FromFormValue<'a> for Url {
-    type Error = Error;
+    type Error = hyper::Error;
 
     fn from_form_value(value: &'a RawStr) -> Result<Self, Self::Error> {
         match Uri::from_str(value) {
@@ -68,8 +100,8 @@ impl<'a> FromFormValue<'a> for Url {
                     inner: uri.to_string()
                 };
                 Ok(val)
-            },
-            Err(e) => Err(Error::Uri(e))
+            }
+            Err(e) => Err(hyper::Error::Uri(e))
         }
     }
 }
