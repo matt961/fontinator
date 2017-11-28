@@ -27,9 +27,19 @@ use rocket::request::{
     Form,
     Request
 };
-use rocket::response::content;
+use rocket::response::{
+    content,
+    NamedFile
+};
 
 use std::str::FromStr;
+
+use std::io;
+
+use std::path::{
+    Path,
+    PathBuf
+};
 
 use futures::{Future, Stream};
 
@@ -67,17 +77,13 @@ fn font_randomizer(url: Form<Url>) -> Result<content::Html<Vec<u8>>, String> {
 }
 
 #[get("/")]
-fn index() -> content::Html<&'static str> {
-    content::Html(
-        include_str!("index.html")
-    )
+fn index() -> io::Result<NamedFile> {
+    NamedFile::open("static/index.html")
 }
 
-#[get("/random-style.css")]
-fn css() -> content::Css<&'static str> {
-    content::Css(
-        include_str!("random-style.css")
-    )
+#[get("/css")]
+fn style() -> io::Result<NamedFile> {
+    NamedFile::open("static/style.css")
 }
 
 #[error(404)]
@@ -87,7 +93,7 @@ fn not_found(req: &Request) -> String {
 
 fn main() {
     rocket::ignite()
-        .mount("/", routes![font_randomizer, index, css])
+        .mount("/", routes![font_randomizer, index, style])
         .catch(errors![not_found])
         .launch();
 }

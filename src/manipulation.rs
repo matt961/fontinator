@@ -112,7 +112,7 @@ pub fn push_style(document: rcdom::Handle) -> Result<(), String> {
     );
 
     let mut s = tendril::StrTendril::new();
-    s.push_slice(include_str!("random-style.css"));
+    s.push_slice(include_str!("../static/random-style.css"));
 
     let text_css = Rc::new(rcdom::Node {
         parent: Cell::new(None),
